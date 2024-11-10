@@ -1,25 +1,46 @@
 version: '3'
 
 services:
+  postgresql:
+    container_name: ms_pg_sql
+    image: postgres
+    environment:
+      POSTGRES_USER: houssemino
+      POSTGRES_PASSWORD: houssemino
+      POSTGRES_DB: product_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
   product-service:
     build: ./product
+    container_name: product_service
     volumes:
       - ./product:/usr/src/app
     ports:
-      - 5001:80
+      - "5001:5001"  # Flask app will run on port 5001 inside the container
     environment:
       - EUREKA_SERVER=http://discovery-server:8090/eureka
+      - POSTGRES_USER=houssemino
+      - POSTGRES_PASSWORD=houssemino
+      - POSTGRES_DB=product_db
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_PORT=5432
+    depends_on:
+      - postgresql
 
   website:
     image: php:apache
+    container_name: website
     volumes:
       - ./website:/var/www/html
     ports:
-      - 5000:80
+      - "5000:80"
     depends_on:
       - product-service
 
-  discovery-server:
-    image: eureka
-    ports:
-      - 8090:8090
+volumes:
+  postgres:
