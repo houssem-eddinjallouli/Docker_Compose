@@ -13,7 +13,8 @@ class Product(Resource):
                 'Product 1',
                 'Product 2',
                 'Product 3',
-                'Product 4']
+                'Product 4',
+                'Product 5']
             }
     
 api.add_resource(Product, '/')
